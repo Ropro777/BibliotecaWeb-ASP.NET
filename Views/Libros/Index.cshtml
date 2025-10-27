@@ -1,0 +1,66 @@
+@model List<BibliotecaWeb.Models.Libro>
+@{
+    ViewData["Title"] = "Libros";
+}
+
+<div class="container mt-4">
+    <h2>📚 Lista de Libros</h2>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>ISBN</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var libro in Model)
+            {
+                <tr>
+                    <td>@libro.LibroID</td>
+                    <td>@libro.Titulo</td>
+                    <td>@libro.Autor</td>
+                    <td>@libro.ISBN</td>
+                    <td>
+                        @if (libro.Estado == "Disponible")
+                        {
+                            <span class="badge badge-success">@libro.Estado</span>
+                        }
+                        else if (libro.Estado == "Prestado")
+                        {
+                            <span class="badge badge-warning">@libro.Estado</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-info">@libro.Estado</span>
+                        }
+                    </td>
+                    <td>
+                        <a href="/Libros/Details/@libro.LibroID" class="btn btn-info btn-sm">👁️ Ver</a>
+                        
+                        <!-- BOTÓN NUEVO: SOLICITAR PRÉSTAMO -->
+                        @if (libro.Estado == "Disponible")
+                        {
+                            <a href="/Prestamos/Create?libroID=@libro.LibroID" 
+                               class="btn btn-success btn-sm">
+                                📥 Pedir Prestado
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                No Disponible
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a href="/Home" class="btn btn-secondary">← Volver al Dashboard</a>
+</div>

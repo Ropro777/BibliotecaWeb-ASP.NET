@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Bienvenido, @ViewBag.Nombre! (@ViewBag.Tipo)</h2>
+            
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Libros</h5>
+                            <h3>@ViewBag.TotalLibros</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h5 class="card-title">Libros Disponibles</h5>
+                            <h3>@ViewBag.LibrosDisponibles</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <h5 class="card-title">Préstamos Activos</h5>
+                            <h3>@ViewBag.PrestamosActivos</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="/Libros" class="btn btn-info">📚 Ver Libros</a>
+                <a href="/Login/Logout" class="btn btn-secondary">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
