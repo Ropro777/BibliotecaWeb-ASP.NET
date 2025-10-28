@@ -2,8 +2,10 @@ services:
   - type: web
     name: biblioteca-web
     env: dotnet
-    buildCommand: dotnet publish -c Release -o ./publish
-    startCommand: cd ./publish && ./BibliotecaWeb
-    envVars:
-      - key: ASPNETCORE_ENVIRONMENT
-        value: Production
+    plan: free
+    buildCommand: dotnet publish -c Release -o publish
+    startCommand: cd publish && dotnet BibliotecaWeb.dll
+    disk:
+      name: datos
+      mountPath: /opt/render/project/src
+      sizeGB: 1
