@@ -15,25 +15,25 @@ namespace BibliotecaWeb.Controllers
             _context = context;
         }
 
-        // LISTAR PRÉSTAMOS DEL USUARIO
-        public IActionResult Index()
-        {
-            if (HttpContext.Session.GetInt32("UsuarioID") == null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
+// LISTAR PRÉSTAMOS DEL USUARIO
+public IActionResult Index()
+{
+    if (HttpContext.Session.GetInt32("UsuarioID") == null)
+    {
+        return RedirectToAction("Index", "Login");
+    }
 
-        // VERIFICAR RETRASOS ANTES DE MOSTRAR
-        VerificarRetrasos();
+    // VERIFICAR RETRASOS ANTES DE MOSTRAR
+    VerificarRetrasos();
 
-        var usuarioID = HttpContext.Session.GetInt32("UsuarioID");
-        var prestamos = _context.Prestamos
-            .Include(p => p.Libro)
-            .Where(p => p.UsuarioID == usuarioID)
-            .OrderByDescending(p => p.FechaPrestamo)
-            .ToList();
+    var usuarioID = HttpContext.Session.GetInt32("UsuarioID");
+    var prestamos = _context.Prestamos
+        .Include(p => p.Libro)
+        .Where(p => p.UsuarioID == usuarioID)
+        .OrderByDescending(p => p.FechaPrestamo)
+        .ToList();
 
-      return View(prestamos);
+    return View(prestamos);
 }
 
         // FORMULARIO PARA SOLICITAR PRÉSTAMO
