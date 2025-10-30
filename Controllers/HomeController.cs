@@ -27,7 +27,6 @@ public IActionResult Index()
     // ESTADÍSTICAS COMPLETAS
     ViewBag.TotalLibros = _context.Libros.Count();
     ViewBag.LibrosDisponibles = _context.Libros.Count(l => l.Estado == "Disponible");
-    ViewBag.LibrosPrestados = _context.Libros.Count(l => l.Estado == "Prestado");
     ViewBag.LibrosReservados = _context.Libros.Count(l => l.Estado == "Reservado");
     ViewBag.PrestamosActivos = _context.Prestamos.Count(p => p.Estado == "Activo" || p.Estado == "Retrasado");
 
