@@ -23,15 +23,18 @@ namespace BibliotecaWeb.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            var usuarioID = HttpContext.Session.GetInt32("UsuarioID");
-            var prestamos = _context.Prestamos
-                .Include(p => p.Libro)
-                .Where(p => p.UsuarioID == usuarioID)
-                .OrderByDescending(p => p.FechaPrestamo)
-                .ToList();
+        // VERIFICAR RETRASOS ANTES DE MOSTRAR
+        VerificarRetrasos();
 
-            return View(prestamos);
-        }
+        var usuarioID = HttpContext.Session.GetInt32("UsuarioID");
+        var prestamos = _context.Prestamos
+            .Include(p => p.Libro)
+            .Where(p => p.UsuarioID == usuarioID)
+            .OrderByDescending(p => p.FechaPrestamo)
+            .ToList();
+
+      return View(prestamos);
+}
 
         // FORMULARIO PARA SOLICITAR PRÉSTAMO
         public IActionResult Create(int? libroID)
