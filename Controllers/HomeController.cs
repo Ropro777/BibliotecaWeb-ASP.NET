@@ -14,33 +14,23 @@ namespace BibliotecaWeb.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+public IActionResult Index()
 {
-    // DEBUG: Verificar estado de la sesión
-    var sessionUserID = HttpContext.Session.GetInt32("UsuarioID");
-    var sessionNombre = HttpContext.Session.GetString("Nombre");
-    
-    System.Console.WriteLine($"=== HOME CONTROLLER ===");
-    System.Console.WriteLine($"Session UsuarioID: {sessionUserID}");
-    System.Console.WriteLine($"Session Nombre: {sessionNombre}");
-    System.Console.WriteLine($"URL actual: {HttpContext.Request.Path}");
-    
-    // Verificar si el usuario está logueado
-    if (sessionUserID == null)
+    if (HttpContext.Session.GetInt32("UsuarioID") == null)
     {
-        System.Console.WriteLine("=== REDIRIGIENDO A LOGIN ===");
         return RedirectToAction("Index", "Login");
     }
 
-    ViewBag.Nombre = sessionNombre;
+    ViewBag.Nombre = HttpContext.Session.GetString("Nombre");
     ViewBag.Tipo = HttpContext.Session.GetString("Tipo");
     
-    // Obtener estadísticas para el dashboard
+    // ESTADÍSTICAS COMPLETAS
     ViewBag.TotalLibros = _context.Libros.Count();
     ViewBag.LibrosDisponibles = _context.Libros.Count(l => l.Estado == "Disponible");
-    ViewBag.PrestamosActivos = _context.Prestamos.Count(p => p.Estado == "Activo");
+    ViewBag.LibrosPrestados = _context.Libros.Count(l => l.Estado == "Prestado");
+    ViewBag.LibrosReservados = _context.Libros.Count(l => l.Estado == "Reservado");
+    ViewBag.PrestamosActivos = _context.Prestamos.Count(p => p.Estado == "Activo" || p.Estado == "Retrasado");
 
-    System.Console.WriteLine("=== MOSTRANDO DASHBOARD ===");
     return View();
 }
 

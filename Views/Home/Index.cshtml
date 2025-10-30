@@ -8,38 +8,96 @@
             <h2>Bienvenido, @ViewBag.Nombre! (@ViewBag.Tipo)</h2>
             
             <div class="row mt-4">
-                <div class="col-md-4">
-                    <div class="card text-white bg-primary">
-                        <div class="card-body">
-                            <h5 class="card-title">Total Libros</h5>
-                            <h3>@ViewBag.TotalLibros</h3>
+                <!-- TOTAL LIBROS -->
+                <div class="col-md-4 mb-3">
+                    <a href="/Libros" class="card-link" style="text-decoration: none;">
+                        <div class="card text-white bg-primary hover-effect">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">📚 Total Libros</h5>
+                                <h3>@ViewBag.TotalLibros</h3>
+                                <small class="text-light">👆 Ver todos los libros</small>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 
-                <div class="col-md-4">
-                    <div class="card text-white bg-success">
-                        <div class="card-body">
-                            <h5 class="card-title">Libros Disponibles</h5>
-                            <h3>@ViewBag.LibrosDisponibles</h3>
+                <!-- LIBROS DISPONIBLES -->
+                <div class="col-md-4 mb-3">
+                    <a href="/Libros" class="card-link" style="text-decoration: none;">
+                        <div class="card text-white bg-success hover-effect">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">✅ Libros Disponibles</h5>
+                                <h3>@ViewBag.LibrosDisponibles</h3>
+                                <small class="text-light">👆 Ver libros disponibles</small>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 
-                <div class="col-md-4">
-                    <div class="card text-white bg-warning">
-                        <div class="card-body">
-                            <h5 class="card-title">Préstamos Activos</h5>
-                            <h3>@ViewBag.PrestamosActivos</h3>
+                <!-- PRÉSTAMOS ACTIVOS -->
+                <div class="col-md-4 mb-3">
+                    <a href="/Prestamos" class="card-link" style="text-decoration: none;">
+                        <div class="card text-white bg-warning hover-effect">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">📒 Préstamos Activos</h5>
+                                <h3>@ViewBag.PrestamosActivos</h3>
+                                <small class="text-light">👆 Gestionar mis préstamos</small>
+                            </div>
                         </div>
-                    </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- NUEVA SECCIÓN: ESTADÍSTICAS DETALLADAS -->
+            <div class="row mt-3">
+                <div class="col-md-6 mb-3">
+                    <a href="/Libros" class="card-link" style="text-decoration: none;">
+                        <div class="card text-white bg-info hover-effect">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">📖 Libros Prestados</h5>
+                                <h3>@ViewBag.LibrosPrestados</h3>
+                                <small class="text-light">👆 Ver libros prestados</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <a href="/Reservas" class="card-link" style="text-decoration: none;">
+                        <div class="card text-white bg-secondary hover-effect">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">📋 Libros Reservados</h5>
+                                <h3>@ViewBag.LibrosReservados</h3>
+                                <small class="text-light">👆 Gestionar reservas</small>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
 
             <div class="mt-4">
-                <a href="/Libros" class="btn btn-info">📚 Ver Libros</a>
-                <a href="/Login/Logout" class="btn btn-secondary">🚪 Cerrar Sesión</a>
+                <a href="/Libros" class="btn btn-info">📚 Ver Todos los Libros</a>
+                <a href="/Prestamos" class="btn btn-warning">📒 Mis Préstamos</a>
+                <a href="/Reservas" class="btn btn-secondary">📋 Mis Reservas</a>
+                <a href="/Login/Logout" class="btn btn-outline-danger">🚪 Cerrar Sesión</a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .hover-effect:hover {
+        transform: scale(1.05);
+        transition: transform 0.2s ease-in-out;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card-link:hover {
+        text-decoration: none !important;
+    }
+    
+    .card {
+        transition: all 0.3s ease;
+    }
+</style>
