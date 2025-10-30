@@ -1,0 +1,11 @@
+{
+  "name": "BibliotecaWeb",
+  "description": "Sistema de gestión de biblioteca",
+  "repository": "https://github.com/Ropro777/BiblioGest",
+  "stack": "dotnet",
+  "buildpacks": [
+    {
+      "url": "https://github.com/jincod/dotnetcore-buildpack"
+    }
+  ]
+}

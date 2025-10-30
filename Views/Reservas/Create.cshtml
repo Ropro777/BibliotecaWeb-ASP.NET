@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Crear Reserva";
+}
+
+<div class="container mt-4">
+    <h2>📋 Crear Reserva</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if (ViewBag.LibroSeleccionado != null)
+    {
+        <div class="alert alert-info">
+            <strong>Libro seleccionado:</strong> @ViewBag.LibroSeleccionado.Titulo - @ViewBag.LibroSeleccionado.Autor
+        </div>
+    }
+
+    <form method="post">
+        <div class="form-group">
+            <label>Seleccionar Libro:</label>
+            <select name="libroID" class="form-control" required>
+                <option value="">-- Selecciona un libro --</option>
+                @foreach (var libro in ViewBag.Libros)
+                {
+                    <option value="@libro.LibroID" 
+                            selected="@(ViewBag.LibroSeleccionado?.LibroID == libro.LibroID)">
+                        @libro.Titulo - @libro.Autor (ISBN: @libro.ISBN) - @libro.Estado
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-warning">📋 Reservar Libro</button>
+            <a href="/Libros" class="btn btn-secondary">Ver Todos los Libros</a>
+            <a href="/Reservas" class="btn btn-outline-secondary">Mis Reservas</a>
+        </div>
+    </form>
+</div>
