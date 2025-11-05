@@ -10,12 +10,12 @@ namespace BibliotecaWeb.Models
         public string Tipo { get; set; } // "Alumno" o "Profesor"
         public string Contraseña { get; set; }
 
-        // SANCIONES
-        public int Sanciones { get; set; }
-        public DateTime? FechaFinSancion { get; set; }
+        // SANCIONES - CON VALORES POR DEFECTO
+        public int Sanciones { get; set; } = 0;
+        public DateTime? FechaFinSancion { get; set; } = null;
         public bool EstaSancionado => Sanciones >= 3 && (FechaFinSancion == null || FechaFinSancion > DateTime.Now);
 
-        // RELACIONES (UNA SOLA VEZ)
+        // RELACIONES
         public ICollection<Prestamo> Prestamos { get; set; }
         public ICollection<Reserva> Reservas { get; set; }
     }
