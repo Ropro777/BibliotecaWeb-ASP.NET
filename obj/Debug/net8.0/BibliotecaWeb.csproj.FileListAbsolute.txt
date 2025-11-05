@@ -164,5 +164,4 @@ C:\Users\servi\OneDrive\Documentos\BibliotecaWeb\bin\Debug\net8.0\publish\Biblio
 C:\Users\servi\OneDrive\Documentos\BibliotecaWeb\bin\Debug\net8.0\Npgsql.dll
 C:\Users\servi\OneDrive\Documentos\BibliotecaWeb\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\servi\OneDrive\Documentos\BibliotecaWeb\bin\Debug\net8.0\app.json
-C:\Users\servi\OneDrive\Documentos\BibliotecaWeb\bin\Debug\net8.0\biblioteca.db
 C:\Users\servi\OneDrive\Documentos\BibliotecaWeb\obj\Debug\net8.0\BibliotecaWeb.sourcelink.json
