@@ -136,7 +136,7 @@ namespace BibliotecaWeb.Controllers
             FechaVencimiento = fechaVencimiento,
             Estado = "Activo",
             TieneSancion = false,
-            MotivoSancion = null, // Explícitamente null
+            MotivoSancion = string.Empty, // Explícitamente null
             FechaFinSancion = null // Explícitamente null
 };
 
