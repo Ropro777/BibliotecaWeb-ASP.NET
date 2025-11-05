@@ -11,7 +11,7 @@ namespace BibliotecaWeb.Models
         public Libro Libro { get; set; }
         public DateTime FechaPrestamo { get; set; }
         public DateTime? FechaDevolucion { get; set; }
-        public string Estado { get; set; } // "Activo", "Devuelto", "Retrasado"
+         public string Estado { get; set; } = "Activo";
         public DateTime FechaVencimiento { get; set; }
         public bool TieneSancion { get; set; } = false;
         public string MotivoSancion { get; set; }

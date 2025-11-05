@@ -127,16 +127,18 @@ namespace BibliotecaWeb.Controllers
                     fechaVencimiento = fechaVencimiento.AddDays(1);
             }
 
-            // Crear el préstamo
+             // Crear el préstamo
             var prestamo = new Prestamo
-            {
-                UsuarioID = usuarioID,
-                LibroID = libroID,
-                FechaPrestamo = ahora,
-                FechaVencimiento = fechaVencimiento,
-                Estado = "Activo",
-                TieneSancion = false
-            };
+{
+            UsuarioID = usuarioID,
+            LibroID = libroID,
+            FechaPrestamo = ahora,
+            FechaVencimiento = fechaVencimiento,
+            Estado = "Activo",
+            TieneSancion = false,
+            MotivoSancion = null, // Explícitamente null
+            FechaFinSancion = null // Explícitamente null
+};
 
             // Actualizar estado del libro
             libro.Estado = "Prestado";
@@ -240,7 +242,7 @@ namespace BibliotecaWeb.Controllers
             return RedirectToAction("Index");
         }
 
-        // NUEVO: MÉTODO PARA VER SANCIONES
+        // MÉTODO PARA VER SANCIONES
         public IActionResult Sanciones()
         {
             if (HttpContext.Session.GetInt32("UsuarioID") == null)

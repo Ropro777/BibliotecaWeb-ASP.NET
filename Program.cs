@@ -15,17 +15,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// CONFIGURACIÓN ÚNICA PARA SQLite (desarrollo y producción)
+// CONFIGURACIÓN PARA RAILWAY
 builder.Services.AddDbContext<BibliotecaContext>(options =>
 {
-    // En Render, usar path persistente; localmente usar path normal
-    var dbPath = Environment.GetEnvironmentVariable("RENDER") != null 
-        ? "/opt/render/project/src/biblioteca.db"
-        : "biblioteca.db";
-    
+    var dbPath = "biblioteca.db";
     options.UseSqlite($"Data Source={dbPath}");
-    
-    Console.WriteLine($"=== Usando SQLite en: {dbPath} ===");
+    Console.WriteLine($"=== Base de datos en: {dbPath} ===");
 });
 
 var app = builder.Build();
@@ -47,30 +42,40 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// INICIALIZAR BASE DE DATOS AL INICIAR
+// ⚠️ RESET COMPLETO DE BASE DE DATOS ⚠️
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<BibliotecaContext>();
-        context.Database.EnsureCreated();
         
-        // Agregar datos iniciales si la base está vacía
+        Console.WriteLine("=== INICIANDO RESET DE BASE DE DATOS ===");
+        // ELIMINAR BASE DE DATOS EXISTENTE
+        context.Database.EnsureDeleted();
+        Console.WriteLine("=== BASE DE DATOS ELIMINADA ===");
+        
+        // CREAR NUEVA BASE DE DATOS
+        context.Database.EnsureCreated();
+        Console.WriteLine("=== NUEVA BASE DE DATOS CREADA ===");
+        
+        // AGREGAR DATOS INICIALES
         if (!context.Usuarios.Any())
         {
+            Console.WriteLine("=== AGREGANDO DATOS INICIALES ===");
+            
             context.Usuarios.AddRange(
-                new Usuario { UsuarioID = 6711630, Nombre = "Renato Alexander Cristaldo Goiris", Tipo = "Alumno", Contraseña = "alumno6711630" },
-                new Usuario { UsuarioID = 6305685, Nombre = "Oscar Sebastian Martinez Benitez", Tipo = "Alumno", Contraseña = "alumno6305685" },
-                new Usuario { UsuarioID = 7645183, Nombre = "Araceli Jazmin Oviedo Encina", Tipo = "Alumno", Contraseña = "alumno7645183" },
-                new Usuario { UsuarioID = 7699668, Nombre = "Camila Lujan Andino Aguilar", Tipo = "Alumno", Contraseña = "alumno7699668" },
-                new Usuario { UsuarioID = 6621742, Nombre = "Alex Hernan Sosa Ugarte", Tipo = "Alumno", Contraseña = "alumno6621742" },
-                new Usuario { UsuarioID = 8239786, Nombre = "Rodrigo Servin Rojas", Tipo = "Alumno", Contraseña = "alumno8239786" },
-                new Usuario { UsuarioID = 7425551, Nombre = "Fatima Elizabeth Vazquez Armoa", Tipo = "Alumno", Contraseña = "alumno7425551" },
-                new Usuario { UsuarioID = 6609006, Nombre = "Mercedes Violeta Oviedo Odecino", Tipo = "Alumno", Contraseña = "alumno6609006" },
-                new Usuario { UsuarioID = 6177459, Nombre = "Arnaldo Rubén Alfonzo Bruno", Tipo = "Alumno", Contraseña = "alumno6177459" },
-                new Usuario { UsuarioID = 6535539, Nombre = "Guadalupe Lujan Portillo Portillo", Tipo = "Alumno", Contraseña = "alumno6535539" },
-                new Usuario { UsuarioID = 2, Nombre = "Ana Torres", Tipo = "Profesor", Contraseña = "profe456" } // PROFESOR AGREGADO CORRECTAMENTE
+                new Usuario { UsuarioID = 6711630, Nombre = "Renato Alexander Cristaldo Goiris", Tipo = "Alumno", Contraseña = "alumno6711630", Sanciones = 0 },
+                new Usuario { UsuarioID = 6305685, Nombre = "Oscar Sebastian Martinez Benitez", Tipo = "Alumno", Contraseña = "alumno6305685", Sanciones = 0 },
+                new Usuario { UsuarioID = 7645183, Nombre = "Araceli Jazmin Oviedo Encina", Tipo = "Alumno", Contraseña = "alumno7645183", Sanciones = 0 },
+                new Usuario { UsuarioID = 7699668, Nombre = "Camila Lujan Andino Aguilar", Tipo = "Alumno", Contraseña = "alumno7699668", Sanciones = 0 },
+                new Usuario { UsuarioID = 6621742, Nombre = "Alex Hernan Sosa Ugarte", Tipo = "Alumno", Contraseña = "alumno6621742", Sanciones = 0 },
+                new Usuario { UsuarioID = 8239786, Nombre = "Rodrigo Servin Rojas", Tipo = "Alumno", Contraseña = "alumno8239786", Sanciones = 0 },
+                new Usuario { UsuarioID = 7425551, Nombre = "Fatima Elizabeth Vazquez Armoa", Tipo = "Alumno", Contraseña = "alumno7425551", Sanciones = 0 },
+                new Usuario { UsuarioID = 6609006, Nombre = "Mercedes Violeta Oviedo Odecino", Tipo = "Alumno", Contraseña = "alumno6609006", Sanciones = 0 },
+                new Usuario { UsuarioID = 6177459, Nombre = "Arnaldo Rubén Alfonzo Bruno", Tipo = "Alumno", Contraseña = "alumno6177459", Sanciones = 0 },
+                new Usuario { UsuarioID = 6535539, Nombre = "Guadalupe Lujan Portillo Portillo", Tipo = "Alumno", Contraseña = "alumno6535539", Sanciones = 0 },
+                new Usuario { UsuarioID = 2, Nombre = "Ana Torres", Tipo = "Profesor", Contraseña = "profe456", Sanciones = 0 }
             );
             
             context.Libros.AddRange(
@@ -87,14 +92,18 @@ using (var scope = app.Services.CreateScope())
             
             context.SaveChanges();
             Console.WriteLine("=== DATOS INICIALES AGREGADOS ===");
-            Console.WriteLine($"=== {context.Usuarios.Count()} USUARIOS CREADOS ===");
-            Console.WriteLine($"=== {context.Libros.Count()} LIBROS CREADOS ===");
+        }
+        else
+        {
+            Console.WriteLine("=== DATOS YA EXISTÍAN, NO SE AGREGARON NUEVOS ===");
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"=== ERROR INICIALIZANDO BD: {ex.Message} ===");
+        Console.WriteLine($"=== ERROR CRÍTICO: {ex.Message} ===");
+        Console.WriteLine($"=== STACK TRACE: {ex.StackTrace} ===");
     }
 }
 
-app.Run();
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Run($"http://0.0.0.0:{port}");
