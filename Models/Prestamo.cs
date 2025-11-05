@@ -13,5 +13,8 @@ namespace BibliotecaWeb.Models
         public DateTime? FechaDevolucion { get; set; }
         public string Estado { get; set; } // "Activo", "Devuelto", "Retrasado"
         public DateTime FechaVencimiento { get; set; }
+        public bool TieneSancion { get; set; }
+        public string MotivoSancion { get; set; }
+        public DateTime? FechaFinSancion { get; set; }
     }
 }

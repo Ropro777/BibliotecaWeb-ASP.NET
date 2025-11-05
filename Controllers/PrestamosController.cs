@@ -15,26 +15,32 @@ namespace BibliotecaWeb.Controllers
             _context = context;
         }
 
-// LISTAR PRÉSTAMOS DEL USUARIO
-public IActionResult Index()
-{
-    if (HttpContext.Session.GetInt32("UsuarioID") == null)
-    {
-        return RedirectToAction("Index", "Login");
-    }
+        // LISTAR PRÉSTAMOS DEL USUARIO
+        public IActionResult Index()
+        {
+            if (HttpContext.Session.GetInt32("UsuarioID") == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
 
-    // VERIFICAR RETRASOS ANTES DE MOSTRAR
-    VerificarRetrasos();
+            // VERIFICAR RETRASOS Y SANCIONES
+            VerificarRetrasos();
+            ActualizarSanciones();
 
-    var usuarioID = HttpContext.Session.GetInt32("UsuarioID");
-    var prestamos = _context.Prestamos
-        .Include(p => p.Libro)
-        .Where(p => p.UsuarioID == usuarioID)
-        .OrderByDescending(p => p.FechaPrestamo)
-        .ToList();
+            var usuarioID = HttpContext.Session.GetInt32("UsuarioID");
+            var prestamos = _context.Prestamos
+                .Include(p => p.Libro)
+                .Where(p => p.UsuarioID == usuarioID)
+                .OrderByDescending(p => p.FechaPrestamo)
+                .ToList();
 
-    return View(prestamos);
-}
+            // Información de sanciones para la vista
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioID == usuarioID);
+            ViewBag.Sanciones = usuario?.Sanciones ?? 0;
+            ViewBag.EstaSancionado = usuario?.EstaSancionado ?? false;
+
+            return View(prestamos);
+        }
 
         // FORMULARIO PARA SOLICITAR PRÉSTAMO
         public IActionResult Create(int? libroID)
@@ -42,6 +48,16 @@ public IActionResult Index()
             if (HttpContext.Session.GetInt32("UsuarioID") == null)
             {
                 return RedirectToAction("Index", "Login");
+            }
+
+            var usuarioID = HttpContext.Session.GetInt32("UsuarioID").Value;
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioID == usuarioID);
+
+            // VERIFICAR SI EL USUARIO ESTÁ SANCIONADO
+            if (usuario?.EstaSancionado == true)
+            {
+                TempData["Error"] = "❌ No puedes solicitar préstamos porque tienes 3 o más sanciones activas.";
+                return RedirectToAction("Index", "Libros");
             }
 
             // Si se pasa un libroID, precargar el formulario
@@ -69,7 +85,15 @@ public IActionResult Index()
             }
 
             var usuarioID = HttpContext.Session.GetInt32("UsuarioID").Value;
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioID == usuarioID);
             var libro = _context.Libros.FirstOrDefault(l => l.LibroID == libroID);
+
+            // VERIFICAR SANCIONES
+            if (usuario?.EstaSancionado == true)
+            {
+                TempData["Error"] = "❌ No puedes solicitar préstamos porque tienes 3 o más sanciones activas.";
+                return RedirectToAction("Index", "Libros");
+            }
 
             if (libro == null || libro.Estado != "Disponible")
             {
@@ -77,17 +101,41 @@ public IActionResult Index()
                 return RedirectToAction("Create");
             }
 
-            // Calcular fecha de vencimiento (14 días desde hoy)
-            var fechaVencimiento = DateTime.Now.AddDays(14);
+            // Validar límite de préstamos activos (máximo 2)
+            var prestamosActivos = _context.Prestamos
+                .Count(p => p.UsuarioID == usuarioID && 
+                           (p.Estado == "Activo" || p.Estado == "Retrasado"));
+
+            if (prestamosActivos >= 2)
+            {
+                TempData["Error"] = "Límite alcanzado: máximo 2 préstamos activos simultáneos";
+                return RedirectToAction("Create");
+            }
+
+            // CALCULAR FECHA DE VENCIMIENTO (mismo día a las 15:00)
+            var ahora = DateTime.Now;
+            var fechaVencimiento = new DateTime(ahora.Year, ahora.Month, ahora.Day, 15, 0, 0);
+            
+            // Si ya pasaron las 15:00, el préstamo es para el siguiente día hábil
+            if (ahora.Hour >= 15)
+            {
+                fechaVencimiento = fechaVencimiento.AddDays(1);
+                // Si es sábado, pasar a lunes
+                if (fechaVencimiento.DayOfWeek == DayOfWeek.Saturday)
+                    fechaVencimiento = fechaVencimiento.AddDays(2);
+                else if (fechaVencimiento.DayOfWeek == DayOfWeek.Sunday)
+                    fechaVencimiento = fechaVencimiento.AddDays(1);
+            }
 
             // Crear el préstamo
             var prestamo = new Prestamo
             {
                 UsuarioID = usuarioID,
                 LibroID = libroID,
-                FechaPrestamo = DateTime.Now,
+                FechaPrestamo = ahora,
                 FechaVencimiento = fechaVencimiento,
-                Estado = "Activo"
+                Estado = "Activo",
+                TieneSancion = false
             };
 
             // Actualizar estado del libro
@@ -96,23 +144,57 @@ public IActionResult Index()
             _context.Prestamos.Add(prestamo);
             _context.SaveChanges();
 
-            TempData["Success"] = $"Préstamo realizado: {libro.Titulo}";
+            TempData["Success"] = $"✅ Préstamo realizado: {libro.Titulo}. Devolver antes de las 15:00 del {fechaVencimiento:dd/MM/yyyy}";
             return RedirectToAction("Index");
         }
-         //MÉTODO NUEVO PARA VERIFICAR RETRASOS
-           private void VerificarRetrasos()
-         {
-          var prestamosActivos = _context.Prestamos
-          .Where(p => p.Estado == "Activo" && p.FechaVencimiento < DateTime.Now)
-          .ToList();
- 
-          foreach (var prestamo in prestamosActivos)
-         {
-          prestamo.Estado = "Retrasado";
+
+        // MÉTODO PARA VERIFICAR RETRASOS
+        private void VerificarRetrasos()
+        {
+            var prestamosActivos = _context.Prestamos
+                .Include(p => p.Usuario)
+                .Where(p => p.Estado == "Activo" && p.FechaVencimiento < DateTime.Now)
+                .ToList();
+
+            foreach (var prestamo in prestamosActivos)
+            {
+                prestamo.Estado = "Retrasado";
+                
+                // Aplicar sanción automáticamente si no tiene sanción previa
+                if (!prestamo.TieneSancion)
+                {
+                    prestamo.TieneSancion = true;
+                    prestamo.MotivoSancion = "Devolución tardía";
+                    
+                    // Incrementar contador de sanciones del usuario
+                    prestamo.Usuario.Sanciones++;
+                    
+                    // Si llega a 3 sanciones, aplicar sanción por 30 días
+                    if (prestamo.Usuario.Sanciones >= 3)
+                    {
+                        prestamo.Usuario.FechaFinSancion = DateTime.Now.AddDays(30);
+                    }
+                }
+            }
+
+            _context.SaveChanges();
         }
 
-          _context.SaveChanges();
-         }
+        // MÉTODO PARA ACTUALIZAR SANCIONES (quitar sanciones vencidas)
+        private void ActualizarSanciones()
+        {
+            var usuariosConSanciones = _context.Usuarios
+                .Where(u => u.FechaFinSancion != null && u.FechaFinSancion <= DateTime.Now)
+                .ToList();
+
+            foreach (var usuario in usuariosConSanciones)
+            {
+                usuario.FechaFinSancion = null;
+                // No resetear el contador de sanciones, solo quitar el bloqueo temporal
+            }
+
+            _context.SaveChanges();
+        }
 
         // DEVOLVER LIBRO
         public IActionResult Devolver(int id)
@@ -124,7 +206,8 @@ public IActionResult Index()
 
             var prestamo = _context.Prestamos
                 .Include(p => p.Libro)
-                .FirstOrDefault(p => p.PrestamoID == id && p.Estado == "Activo");
+                .Include(p => p.Usuario)
+                .FirstOrDefault(p => p.PrestamoID == id && (p.Estado == "Activo" || p.Estado == "Retrasado"));
 
             if (prestamo == null)
             {
@@ -139,10 +222,44 @@ public IActionResult Index()
             // Liberar el libro
             prestamo.Libro.Estado = "Disponible";
 
+            // Verificar si se aplicó sanción por retraso
+            var mensaje = $"✅ Libro devuelto: {prestamo.Libro.Titulo}";
+            if (prestamo.TieneSancion)
+            {
+                mensaje += $". ⚠️ Se aplicó 1 sanción por devolución tardía. Sanciones totales: {prestamo.Usuario.Sanciones}/3";
+                
+                if (prestamo.Usuario.Sanciones >= 3)
+                {
+                    mensaje += $". 🚫 Bloqueado hasta el {prestamo.Usuario.FechaFinSancion:dd/MM/yyyy}";
+                }
+            }
+
             _context.SaveChanges();
 
-            TempData["Success"] = $"Libro devuelto: {prestamo.Libro.Titulo}";
+            TempData["Success"] = mensaje;
             return RedirectToAction("Index");
+        }
+
+        // NUEVO: MÉTODO PARA VER SANCIONES
+        public IActionResult Sanciones()
+        {
+            if (HttpContext.Session.GetInt32("UsuarioID") == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            var usuarioID = HttpContext.Session.GetInt32("UsuarioID");
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioID == usuarioID);
+            var prestamosSancionados = _context.Prestamos
+                .Include(p => p.Libro)
+                .Where(p => p.UsuarioID == usuarioID && p.TieneSancion)
+                .OrderByDescending(p => p.FechaPrestamo)
+                .ToList();
+
+            ViewBag.Usuario = usuario;
+            ViewBag.PrestamosSancionados = prestamosSancionados;
+
+            return View();
         }
     }
 }

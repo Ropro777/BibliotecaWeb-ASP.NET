@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BibliotecaWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b6e65cafca37a86444d6f9c24363461602a17f3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f9b724518cb27ec0a59f9911bab132015dbb20d1")]
 [assembly: System.Reflection.AssemblyProductAttribute("BibliotecaWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BibliotecaWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

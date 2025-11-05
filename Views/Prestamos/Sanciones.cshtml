@@ -1,0 +1,95 @@
+@{
+    ViewData["Title"] = "Mis Sanciones";
+}
+
+<div class="container mt-4">
+    <h2>⚠️ Mis Sanciones</h2>
+
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Resumen de Sanciones</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Sanciones Actuales:</h6>
+                    <h3 class="text-danger">@ViewBag.Usuario.Sanciones / 3</h3>
+                </div>
+                <div class="col-md-6">
+                    <h6>Estado:</h6>
+                    @if (ViewBag.Usuario.EstaSancionado)
+                    {
+                        <span class="badge badge-danger">🚫 SANCIONADO</span>
+                        <p class="mt-2 mb-0">
+                            <strong>Bloqueado hasta:</strong> 
+                            @ViewBag.Usuario.FechaFinSancion?.ToString("dd/MM/yyyy")
+                        </p>
+                    }
+                    else
+                    {
+                        <span class="badge badge-success">✅ ACTIVO</span>
+                        <p class="mt-2 mb-0 text-muted">
+                            @(ViewBag.Usuario.Sanciones == 0 ? "Sin sanciones" : 
+                              ViewBag.Usuario.Sanciones == 1 ? "1 sanción - 2 disponibles" : 
+                              "2 sanciones - 1 disponible")
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (ViewBag.PrestamosSancionados.Count > 0)
+    {
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Historial de Sanciones</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Libro</th>
+                            <th>Fecha Préstamo</th>
+                            <th>Fecha Devolución</th>
+                            <th>Motivo Sanción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var prestamo in ViewBag.PrestamosSancionados)
+                        {
+                            <tr>
+                                <td>@prestamo.Libro.Titulo</td>
+                                <td>@prestamo.FechaPrestamo.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (prestamo.FechaDevolucion.HasValue)
+                                    {
+                                        @prestamo.FechaDevolucion.Value.ToString("dd/MM/yyyy HH:mm")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No devuelto</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="text-danger">@prestamo.MotivoSancion</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No tienes sanciones en tu historial.
+        </div>
+    }
+
+    <div class="mt-3">
+        <a href="/Prestamos" class="btn btn-secondary">← Volver a Mis Préstamos</a>
+        <a href="/Home" class="btn btn-outline-secondary">🏠 Ir al Inicio</a>
+    </div>
+</div>
