@@ -20,10 +20,13 @@
                     @if (ViewBag.Usuario.EstaSancionado)
                     {
                         <span class="badge badge-danger">🚫 SANCIONADO</span>
-                        <p class="mt-2 mb-0">
-                            <strong>Bloqueado hasta:</strong> 
-                            @ViewBag.Usuario.FechaFinSancion?.ToString("dd/MM/yyyy")
-                        </p>
+                        @if (ViewBag.Usuario.FechaFinSancion != null)
+                        {
+                            <p class="mt-2 mb-0">
+                                <strong>Bloqueado hasta:</strong> 
+                                @ViewBag.Usuario.FechaFinSancion.ToString("dd/MM/yyyy")
+                            </p>
+                        }
                     }
                     else
                     {
